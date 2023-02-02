@@ -125,27 +125,43 @@ async function getPedidosMaisVendidos(){
 
   function groupBy(arr, key){
     return arr.reduce((hash, obj) => {
-      if(obj[key] === undefined) return hash;
+      if(obj.entregue === true){
+        (hash[obj[key]] = hash[obj[key]] || []).push(obj);
+        return hash;
+      }
 
-      return Object.assign(hash, { [obj[key]]:(hash[obj[key]] || []).concat(obj) })
+      return hash;
     }, {})
   }
 
   const groupArray = groupBy(base.pedidos, "produto");
 
-  console.log(groupArray);
-  // const orderByArray = mapArray.sort((a, b) => {
-  //   if(a.quantidade < b.quantidade){
-  //     return -1;
-  //   }
-  //   if(a.quantidade > b.quantidade){
-  //     return 1;
-  //   }
+  const produtos = Object.keys(groupArray);
 
-  //   return 0;
-  // });
+  const newArray = [];
+
+  produtos.forEach(item => {
+    newArray.push({
+      total: groupArray[item].length,
+      produto: item
+    })  
+  });
+
+  const order = newArray.sort((a, b) => {
+    if(a.total > b.total){
+      return -1;
+    }else if(a.total < b.total){
+      return 1;
+    }
+    
+    return 0;
+  });
+
+  const fullProdutos = order.map(item => {
+    return `${item.produto} - ${item.total}`;
+  })
   
-  return groupArray;
+  return fullProdutos;
 }
 
 export default {
